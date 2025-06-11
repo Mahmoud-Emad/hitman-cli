@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2024-12-19
+
+### Fixed
+- **Release Workflow**: Resolved artifact download path issue in GitHub Actions
+- **Artifact Handling**: Fixed directory structure handling for actions/download-artifact@v4
+- **File Movement**: Improved artifact organization and debugging output
+
+### Technical
+- Enhanced release workflow with better error handling
+- Added debugging output for artifact directory structure
+- Proper handling of nested artifact directories
+
 ## [0.1.2] - 2024-12-19
 
 ### Fixed
