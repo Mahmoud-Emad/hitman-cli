@@ -113,12 +113,20 @@ jobs:
     name: Build Check
     strategy:
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
-          - x86_64-apple-darwin
-          - x86_64-pc-windows-msvc
-    runs-on: ubuntu-latest
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            use-cross: false
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            use-cross: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            use-cross: false
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            use-cross: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -134,9 +142,15 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Install cross
-        run: cargo install cross
+        if: matrix.use-cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
 
-      - name: Build for target
+      - name: Build for target (native)
+        if: '!matrix.use-cross'
+        run: cargo build --target ${{ matrix.target }} --release
+
+      - name: Build for target (cross)
+        if: matrix.use-cross
         run: cross build --target ${{ matrix.target }} --release
 
   integration:

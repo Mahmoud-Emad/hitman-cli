@@ -42,15 +42,14 @@ This document describes the cross-platform build setup for Hitman, enabling auto
 
 ## Build Targets
 
-| Platform | Architecture | Target Triple | Package Format |
-|----------|-------------|---------------|----------------|
-| Linux | x86_64 | `x86_64-unknown-linux-gnu` | tar.gz |
-| Linux (musl) | x86_64 | `x86_64-unknown-linux-musl` | tar.gz |
-| Linux | ARM64 | `aarch64-unknown-linux-gnu` | tar.gz |
-| macOS | Intel | `x86_64-apple-darwin` | tar.gz |
-| macOS | Apple Silicon | `aarch64-apple-darwin` | tar.gz |
-| Windows | x86_64 | `x86_64-pc-windows-msvc` | zip |
-| Windows | ARM64 | `aarch64-pc-windows-msvc` | zip |
+| Platform | Architecture | Target Triple | Package Format | Cross-Compile |
+|----------|-------------|---------------|----------------|---------------|
+| Linux | x86_64 | `x86_64-unknown-linux-gnu` | tar.gz | No |
+| Linux (musl) | x86_64 | `x86_64-unknown-linux-musl` | tar.gz | Yes |
+| Linux | ARM64 | `aarch64-unknown-linux-gnu` | tar.gz | Yes |
+| macOS | Intel | `x86_64-apple-darwin` | tar.gz | No |
+| macOS | Apple Silicon | `aarch64-apple-darwin` | tar.gz | No |
+| Windows | x86_64 | `x86_64-pc-windows-msvc` | zip | No |
 
 ## Local Build Scripts
 

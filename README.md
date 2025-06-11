@@ -56,7 +56,6 @@ Download the latest release for your platform from the [GitHub Releases](https:/
 - **macOS (Intel)**: `hitman-macos-x86_64.tar.gz`
 - **macOS (Apple Silicon)**: `hitman-macos-aarch64.tar.gz`
 - **Windows (x86_64)**: `hitman-windows-x86_64.zip`
-- **Windows (ARM64)**: `hitman-windows-aarch64.zip`
 
 ```bash
 # Example for Linux x86_64
