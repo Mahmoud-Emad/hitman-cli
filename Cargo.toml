@@ -1,6 +1,6 @@
 [package]
 name = "hitman"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Omdanii <mahmmoud.hassanein@gmail.com>"]
 description = "A lightweight HTTP testing tool that reads .hit files and executes HTTP requests with support for variables, comments, and parallel execution"
