@@ -19,23 +19,24 @@ pub enum VariableValue {
     Json(Value),
 }
 
-impl VariableValue {
-    /// Convert the variable value to a string for substitution.
-    pub fn to_string(&self) -> String {
+impl std::fmt::Display for VariableValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            VariableValue::String(s) => s.clone(),
+            VariableValue::String(s) => write!(f, "{}", s),
             VariableValue::Number(n) => {
                 if n.fract() == 0.0 {
-                    format!("{}", *n as i64)
+                    write!(f, "{}", *n as i64)
                 } else {
-                    format!("{}", n)
+                    write!(f, "{}", n)
                 }
             }
-            VariableValue::Boolean(b) => b.to_string(),
-            VariableValue::Json(v) => v.to_string(),
+            VariableValue::Boolean(b) => write!(f, "{}", b),
+            VariableValue::Json(v) => write!(f, "{}", v),
         }
     }
+}
 
+impl VariableValue {
     /// Get the JSON value representation.
     pub fn to_json(&self) -> Value {
         match self {
@@ -188,32 +189,27 @@ impl VariableStore {
     pub fn substitute(&self, text: &str) -> Result<String> {
         let mut result = text.to_string();
 
-        // Use a loop to handle multiple variables in the same string
-        loop {
-            if let Some(open_pos) = result.find("{{") {
-                if let Some(close_pos) = result[open_pos + 2..].find("}}") {
-                    let close_pos = open_pos + 2 + close_pos;
-                    let var_name = &result[open_pos + 2..close_pos];
+        // Use a while let loop to handle multiple variables in the same string
+        while let Some(open_pos) = result.find("{{") {
+            if let Some(close_pos) = result[open_pos + 2..].find("}}") {
+                let close_pos = open_pos + 2 + close_pos;
+                let var_name = &result[open_pos + 2..close_pos];
 
-                    if let Some(var_value) = self.variables.get(var_name) {
-                        let replacement = var_value.to_string();
-                        result.replace_range(open_pos..close_pos + 2, &replacement);
-                        // Continue the loop to find more variables
-                    } else {
-                        return Err(HitError::ParseError {
-                            line: 0, // Line number not available in this context
-                            reason: format!("Undefined variable: {}", var_name),
-                        });
-                    }
+                if let Some(var_value) = self.variables.get(var_name) {
+                    let replacement = var_value.to_string();
+                    result.replace_range(open_pos..close_pos + 2, &replacement);
+                    // Continue the loop to find more variables
                 } else {
                     return Err(HitError::ParseError {
-                        line: 0,
-                        reason: "Unclosed variable substitution: missing '}}'".to_string(),
+                        line: 0, // Line number not available in this context
+                        reason: format!("Undefined variable: {}", var_name),
                     });
                 }
             } else {
-                // No more variables to substitute
-                break;
+                return Err(HitError::ParseError {
+                    line: 0,
+                    reason: "Unclosed variable substitution: missing '}}'".to_string(),
+                });
             }
         }
 

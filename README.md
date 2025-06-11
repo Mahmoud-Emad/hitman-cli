@@ -1,5 +1,9 @@
 # Hitman 🎯
 
+[![VS Code Extension](https://img.shields.io/visual-studio-marketplace/v/hitman-dev.hitman-http-scripting?label=VS%20Code%20Extension&logo=visual-studio-code&color=blue)](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)
+[![Crates.io](https://img.shields.io/crates/v/hitman?logo=rust)](https://crates.io/crates/hitman)
+[![GitHub Release](https://img.shields.io/github/v/release/Mahmoud-Emad/hitman-cli?logo=github)](https://github.com/Mahmoud-Emad/hitman-cli/releases)
+
 A lightweight HTTP testing tool that reads `.hit` files and executes HTTP requests with support for variables, comments, parallel execution, and comprehensive reporting.
 
 ## Features
@@ -34,6 +38,12 @@ A lightweight HTTP testing tool that reads `.hit` files and executes HTTP reques
 - ✅ **Comprehensive Testing**: 58 tests covering all functionality
 - 🔢 **Proper Exit Codes**: 0 (success), 1 (parse errors), 2 (runtime errors), 3 (invalid args)
 
+### IDE Support
+- 🔧 **VS Code Extension**: Syntax highlighting, error detection, and code completion
+- 📝 **IntelliSense**: Smart autocomplete for HTTP methods, headers, and variables
+- 🎨 **Syntax Highlighting**: Beautiful syntax coloring for `.hit` files
+- ❌ **Error Detection**: Real-time validation and error reporting
+
 ## Installation
 
 ### Pre-built Binaries (Recommended)
@@ -63,7 +73,7 @@ cargo install hitman
 ```bash
 # Clone the repository
 git clone https://github.com/Mahmoud-Emad/hitman-cli.git
-cd hitman
+cd hitman-cli
 
 # Build the project
 cargo build --release
@@ -86,9 +96,46 @@ brew install hitman
 choco install hitman
 ```
 
+## VS Code Extension
+
+Enhance your `.hit` file editing experience with the official VS Code extension:
+
+**[Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)**
+
+### Features
+- 🎨 **Syntax Highlighting**: Beautiful color coding for HTTP methods, URLs, headers, and variables
+- 📝 **IntelliSense**: Smart autocomplete for:
+  - HTTP methods (GET, POST, PUT, DELETE, etc.)
+  - Common headers (Content-Type, Authorization, etc.)
+  - Variable names and interpolation
+- ❌ **Error Detection**: Real-time validation with error squiggles and helpful messages
+- 🔧 **Code Formatting**: Automatic formatting and indentation
+- 📋 **Snippets**: Quick templates for common request patterns
+- 🔍 **Go to Definition**: Navigate to variable definitions
+- 📖 **Hover Information**: Contextual help and documentation
+
+### Installation
+1. **From VS Code**: Search for "Hitman HTTP Scripting" in the Extensions view (`Ctrl+Shift+X`)
+2. **From Marketplace**: Visit the [extension page](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)
+3. **Command Line**: `code --install-extension hitman-dev.hitman-http-scripting`
+
+### Usage
+1. Create or open a `.hit` file
+2. Start typing - IntelliSense will provide suggestions
+3. Use `Ctrl+Space` for manual completion
+4. Errors will be highlighted with red squiggles
+5. Hover over elements for additional information
+
 ## Quick Start
 
-### Basic Usage
+### 1. Install VS Code Extension (Recommended)
+Get the best editing experience with syntax highlighting and error detection:
+```bash
+code --install-extension hitman-dev.hitman-http-scripting
+```
+Or install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)
+
+### 2. Basic Usage
 ```bash
 # Execute requests from a file
 hitman requests.hit
@@ -147,7 +194,7 @@ hitman --timeout 10 --log debug --color never requests.hit
 
 ## File Format
 
-The `.hit` file format supports variables, multiple comment styles, and HTTP request blocks:
+The `.hit` file format supports variables, multiple comment styles, and HTTP request blocks. For the best editing experience, use the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting) which provides syntax highlighting, error detection, and IntelliSense.
 
 ### Variables
 ```hit
@@ -339,18 +386,15 @@ cargo clippy
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass (`cargo test`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+3. **Install the VS Code extension** for the best development experience
+4. Make your changes
+5. Add tests for new functionality
+6. Ensure all tests pass (`cargo test`)
+7. Commit your changes (`git commit -m 'Add amazing feature'`)
+8. Push to the branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
 
-## License
-
-This project is licensed under either of
-
-- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
+### Development Setup
+- Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting) for syntax highlighting
+- Use the provided example files in `examples/` for testing
+- Run `cargo test` frequently to ensure your changes don't break existing functionality

@@ -2,6 +2,8 @@
 
 This document describes the cross-platform build setup for Hitman, enabling automatic builds for macOS, Linux, and Windows.
 
+> **💡 Tip**: For the best development experience, install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting) which provides syntax highlighting, error detection, and IntelliSense for `.hit` files.
+
 ## GitHub Workflows
 
 ### 1. CI Workflow (`.github/workflows/ci.yml`)

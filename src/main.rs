@@ -9,9 +9,10 @@ use std::io::{self, Read};
 use std::process;
 
 /// Color output options
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone, ValueEnum, Default)]
 pub enum ColorOption {
     /// Automatically detect if colors should be used
+    #[default]
     Auto,
     /// Always use colors
     Always,
@@ -19,29 +20,18 @@ pub enum ColorOption {
     Never,
 }
 
-impl Default for ColorOption {
-    fn default() -> Self {
-        ColorOption::Auto
-    }
-}
-
 /// Log level options
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone, ValueEnum, Default)]
 pub enum LogLevel {
     /// Debug level logging
     Debug,
     /// Info level logging
+    #[default]
     Info,
     /// Warning level logging
     Warn,
     /// Error level logging
     Error,
-}
-
-impl Default for LogLevel {
-    fn default() -> Self {
-        LogLevel::Info
-    }
 }
 
 /// A simple HTTP client for executing .hit files
@@ -307,7 +297,7 @@ async fn run(cli: &Cli) -> Result<(), HitError> {
         println!("📋 Variables defined:");
         for name in variables.variable_names() {
             if let Some(value) = variables.get(name) {
-                println!("  {} = {}", name, value.to_string());
+                println!("  {} = {}", name, value);
             }
         }
         println!();

@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JSON report generation
 - Smart comment parsing (handles `//` in URLs correctly)
 - 58 comprehensive tests covering all functionality
+- Official VS Code extension for enhanced development experience
 
 ### Features
 - **Language Support**: Complete `.hit` file format implementation
@@ -51,6 +52,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Output Control**: Verbose, quiet, and configurable log levels
 - **Error Handling**: Comprehensive error reporting with proper exit codes
 - **Testing**: Extensive test suite with unit, integration, and CLI tests
+- **IDE Support**: Official VS Code extension with syntax highlighting and IntelliSense
+
+### VS Code Extension
+- **Marketplace**: [hitman-dev.hitman-http-scripting](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)
+- **Syntax Highlighting**: Full syntax coloring for `.hit` files
+- **IntelliSense**: Smart autocomplete for HTTP methods, headers, and variables
+- **Error Detection**: Real-time validation with error squiggles
+- **Code Formatting**: Automatic formatting and indentation
+- **Snippets**: Quick templates for common request patterns
+- **Go to Definition**: Navigate to variable definitions
+- **Hover Information**: Contextual help and documentation
 
 ### Technical Details
 - Built with Rust for performance and reliability

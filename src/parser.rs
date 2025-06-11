@@ -77,7 +77,7 @@ pub fn parse_block_with_variables(
                 });
             }
             has_header_directive = true;
-            let (consumed_lines, complete_directive) = parse_multiline_directive(&lines, i)?;
+            let (consumed_lines, complete_directive) = parse_multiline_directive(lines, i)?;
             parse_header_line(&complete_directive, line_number, &mut headers, variables)?;
             i += consumed_lines;
         } else if trimmed_line.starts_with("WITH DATA") {
@@ -88,7 +88,7 @@ pub fn parse_block_with_variables(
                 });
             }
             has_data_directive = true;
-            let (consumed_lines, complete_directive) = parse_multiline_directive(&lines, i)?;
+            let (consumed_lines, complete_directive) = parse_multiline_directive(lines, i)?;
             body = Some(parse_data_line(
                 &complete_directive,
                 line_number,
@@ -103,7 +103,7 @@ pub fn parse_block_with_variables(
                 });
             }
             has_query_directive = true;
-            let (consumed_lines, complete_directive) = parse_multiline_directive(&lines, i)?;
+            let (consumed_lines, complete_directive) = parse_multiline_directive(lines, i)?;
             parse_query_line(&complete_directive, line_number, &mut query, variables)?;
             i += consumed_lines;
         } else if trimmed_line.starts_with("WITH ") {
@@ -178,19 +178,18 @@ fn parse_header_line(
 
     // Try to parse as JSON first (for new format with quoted keys)
     let json_str = format!("{{{}}}", inside);
-    if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&json_str) {
-        if let serde_json::Value::Object(obj) = parsed {
-            for (key, value) in obj {
-                let value_str = match value {
-                    serde_json::Value::String(s) => s,
-                    serde_json::Value::Number(n) => n.to_string(),
-                    serde_json::Value::Bool(b) => b.to_string(),
-                    _ => value.to_string(),
-                };
-                headers.insert(key, value_str);
-            }
-            return Ok(());
+    if let Ok(serde_json::Value::Object(obj)) = serde_json::from_str::<serde_json::Value>(&json_str)
+    {
+        for (key, value) in obj {
+            let value_str = match value {
+                serde_json::Value::String(s) => s,
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::Bool(b) => b.to_string(),
+                _ => value.to_string(),
+            };
+            headers.insert(key, value_str);
         }
+        return Ok(());
     }
 
     // Fall back to legacy format (unquoted keys)

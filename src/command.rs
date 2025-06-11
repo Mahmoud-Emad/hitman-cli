@@ -42,9 +42,10 @@ pub enum HttpMethod {
     Unlock,
 }
 
-impl HttpMethod {
-    /// Parse an HTTP method from a string.
-    pub fn from_str(method: &str) -> Result<Self> {
+impl std::str::FromStr for HttpMethod {
+    type Err = HitError;
+
+    fn from_str(method: &str) -> std::result::Result<Self, Self::Err> {
         match method.to_uppercase().as_str() {
             "GET" => Ok(HttpMethod::Get),
             "POST" => Ok(HttpMethod::Post),
@@ -102,7 +103,7 @@ impl HitCommand {
         query: HashMap<String, String>,
         body: Option<String>,
     ) -> Result<Self> {
-        let method = HttpMethod::from_str(method)?;
+        let method = method.parse::<HttpMethod>()?;
 
         // Validate URL using the url crate
         let parsed_url = Url::parse(url).map_err(|e| HitError::UrlParseError { source: e })?;
@@ -172,12 +173,12 @@ mod tests {
 
     #[test]
     fn test_http_method_from_str() {
-        assert_eq!(HttpMethod::from_str("GET").unwrap(), HttpMethod::Get);
-        assert_eq!(HttpMethod::from_str("POST").unwrap(), HttpMethod::Post);
-        assert_eq!(HttpMethod::from_str("put").unwrap(), HttpMethod::Put);
-        assert_eq!(HttpMethod::from_str("Delete").unwrap(), HttpMethod::Delete);
+        assert_eq!("GET".parse::<HttpMethod>().unwrap(), HttpMethod::Get);
+        assert_eq!("POST".parse::<HttpMethod>().unwrap(), HttpMethod::Post);
+        assert_eq!("put".parse::<HttpMethod>().unwrap(), HttpMethod::Put);
+        assert_eq!("Delete".parse::<HttpMethod>().unwrap(), HttpMethod::Delete);
 
-        assert!(HttpMethod::from_str("INVALID").is_err());
+        assert!("INVALID".parse::<HttpMethod>().is_err());
     }
 
     #[test]
