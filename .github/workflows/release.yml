@@ -6,6 +6,11 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 env:
   CARGO_TERM_COLOR: always
 
