@@ -1,7 +1,7 @@
 # Hitman 🎯
 
 [![VS Code Extension](https://img.shields.io/visual-studio-marketplace/v/hitman-dev.hitman-http-scripting?label=VS%20Code%20Extension&logo=visual-studio-code&color=blue)](https://marketplace.visualstudio.com/items?itemName=hitman-dev.hitman-http-scripting)
-[![Crates.io](https://img.shields.io/crates/v/hitman?logo=rust)](https://crates.io/crates/hitman)
+[![Crates.io](https://img.shields.io/crates/v/hitman?logo=rust)](https://crates.io/crates/hitman-cli)
 [![GitHub Release](https://img.shields.io/github/v/release/Mahmoud-Emad/hitman-cli?logo=github)](https://github.com/Mahmoud-Emad/hitman-cli/releases)
 
 A lightweight HTTP testing tool that reads `.hit` files and executes HTTP requests with support for variables, comments, parallel execution, and comprehensive reporting.
