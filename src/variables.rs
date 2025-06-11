@@ -344,7 +344,7 @@ mod tests {
         store.parse_define("DEFINE enabled=true", 1).unwrap();
 
         if let Some(VariableValue::Boolean(b)) = store.get("enabled") {
-            assert_eq!(*b, true);
+            assert!(*b);
         } else {
             panic!("Expected boolean variable");
         }
@@ -463,7 +463,7 @@ mod tests {
             .parse_define("DEFINE active=true; # another comment", 3)
             .unwrap();
         if let Some(VariableValue::Boolean(b)) = store.get("active") {
-            assert_eq!(*b, true);
+            assert!(*b);
         } else {
             panic!("Expected boolean variable, got: {:?}", store.get("active"));
         }
@@ -471,7 +471,7 @@ mod tests {
         // Test with ; only (no comment after)
         store.parse_define("DEFINE flag=false;", 4).unwrap();
         if let Some(VariableValue::Boolean(b)) = store.get("flag") {
-            assert_eq!(*b, false);
+            assert!(!*b);
         } else {
             panic!("Expected boolean variable, got: {:?}", store.get("flag"));
         }

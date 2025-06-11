@@ -5,7 +5,7 @@ use std::process::Command;
 fn get_binary_path() -> String {
     // Get the path to the compiled binary
     let output = Command::new("cargo")
-        .args(&["build", "--quiet"])
+        .args(["build", "--quiet"])
         .output()
         .expect("Failed to build binary");
 
@@ -66,7 +66,7 @@ fn test_cli_simple_file() {
 #[test]
 fn test_cli_verbose_mode() {
     let output = Command::new(get_binary_path())
-        .args(&["-v", "tests/fixtures/simple.hit"])
+        .args(["-v", "tests/fixtures/simple.hit"])
         .output()
         .expect("Failed to execute command");
 
@@ -82,7 +82,7 @@ fn test_cli_verbose_mode() {
 #[test]
 fn test_cli_dry_run() {
     let output = Command::new(get_binary_path())
-        .args(&["--dry-run", "tests/fixtures/simple.hit"])
+        .args(["--dry-run", "tests/fixtures/simple.hit"])
         .output()
         .expect("Failed to execute command");
 
