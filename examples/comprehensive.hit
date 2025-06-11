@@ -1,0 +1,88 @@
+# Comprehensive example showcasing all Hitman features
+# This file demonstrates variables, comments, and HTTP requests
+
+# ===== VARIABLES =====
+# Define variables at the top of the file
+DEFINE baseUrl="https://httpbin.org" # Base API URL
+DEFINE apiKey="demo-key-123" // API authentication key
+DEFINE timeout=30; # Request timeout in seconds
+DEFINE debug=true
+DEFINE userAgent="Hitman/1.0"
+
+ 
+# User data as JSON object
+DEFINE user={
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 30,
+    "active": true
+}
+
+# Array of tags
+DEFINE tags=["api", "testing", "http"]
+
+# ===== HTTP REQUESTS =====
+
+# Simple GET request
+GET {{baseUrl}}/get
+
+# GET with query parameters
+GET {{baseUrl}}/get
+    WITH QUERY {
+        "name": "{{user.name}}",
+        "debug": "{{debug}}",
+        "tags": "{{tags}}"
+    }
+    WITH HEADER {
+        "User-Agent": "{{userAgent}}",
+        "X-API-Key": "{{apiKey}}"
+    }
+
+# POST with JSON data
+POST {{baseUrl}}/post
+    WITH HEADER {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {{apiKey}}",
+        "User-Agent": "{{userAgent}}"
+    }
+    WITH DATA {{user}}
+
+# POST with form data
+POST {{baseUrl}}/post
+    WITH HEADER {"Content-Type": "application/x-www-form-urlencoded"}
+    WITH DATA {
+        "username": "{{user.name}}",
+        "email": "{{user.email}}",
+        "active": "{{user.active}}"
+    }
+
+# PUT request with all clauses
+PUT {{baseUrl}}/put
+    WITH QUERY {"version": "v1"}
+    WITH HEADER {
+        "Content-Type": "application/json",
+        "X-Request-ID": "req-123",
+        "Authorization": "Bearer {{apiKey}}"
+    }
+    WITH DATA {
+        "user": {{user}},
+        "metadata": {
+            "source": "hitman",
+            "timestamp": "2024-01-01T00:00:00Z"
+        }
+    }
+
+# PATCH request
+PATCH {{baseUrl}}/patch
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {"active": false}
+
+# DELETE request
+DELETE {{baseUrl}}/delete
+    WITH HEADER {"Authorization": "Bearer {{apiKey}}"}
+
+# HEAD request (check if resource exists)
+HEAD {{baseUrl}}/get
+
+# OPTIONS request (check allowed methods)
+OPTIONS {{baseUrl}}/get

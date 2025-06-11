@@ -1,0 +1,52 @@
+DEFINE token="this is a token"
+DEFINE url="https://api.example.com"
+DEFINE number=123 # we can add inline comments
+DEFINE boolean=true; # We can add ; symbol or not so its flexible
+DEFINE headers={
+    "Content-Type": "application/json",
+    "Authorization": "Bearer token"
+}
+DEFINE data={
+    "test": true
+}
+
+# Simple GET request with variable
+GET {{url}}/test
+    WITH HEADER {{headers}}
+    WITH DATA {{data}}
+
+# Request with token
+GET https://api.example.com/test?token={{token}}
+
+# Request with number
+GET https://api.example.com/test?number={{number}}
+
+# Request with boolean
+GET https://api.example.com/test?boolean={{boolean}}
+
+
+# All in the same block
+GET {{url}}/test
+    WITH HEADER {{headers}}
+    WITH DATA {{data}}
+    WITH QUERY {
+        "token": "{{token}}",
+        "number": {{number}},
+        "boolean": {{boolean}}
+    }
+
+
+# without variables
+GET https://api.example.com/test
+    WITH HEADER {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer token"
+    }
+    WITH DATA {
+        "test": true
+    }
+    WITH QUERY {
+        "token": "this is a token",
+        "number": 123,
+        "boolean": true
+    }

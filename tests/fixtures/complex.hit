@@ -1,0 +1,19 @@
+POST https://reqres.in/api/users
+    WITH HEADER {Content-Type: application/json}
+    WITH DATA {"name": "John", "job": "developer"}
+
+PUT https://reqres.in/api/users/2
+    WITH DATA {"name": "Jane", "job": "designer"}
+    WITH HEADER {Content-Type: application/json}
+
+DELETE https://reqres.in/api/users/2
+    WITH HEADER {Authorization: Bearer dummy-token-456}
+
+PATCH https://reqres.in/api/users/2
+    WITH DATA {"status": "active", "last_login": "2023-12-01T10:00:00Z"}
+    WITH HEADER {Content-Type: application/json}
+
+HEAD https://jsonplaceholder.typicode.com/posts/1
+
+OPTIONS https://jsonplaceholder.typicode.com/posts
+    WITH HEADER {Origin: https://example.com}

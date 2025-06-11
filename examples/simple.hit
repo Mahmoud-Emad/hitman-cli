@@ -1,0 +1,34 @@
+# Simple example for getting started with Hitman
+
+# Define some variables
+DEFINE baseUrl="https://jsonplaceholder.typicode.com"
+DEFINE userId=1
+
+# Simple GET request
+GET {{baseUrl}}/posts
+
+# GET with query parameters
+GET {{baseUrl}}/posts
+    WITH QUERY {"userId": {{userId}}}
+
+# POST with JSON data
+POST {{baseUrl}}/posts
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {
+        "title": "My Post",
+        "body": "This is the post content",
+        "userId": {{userId}}
+    }
+
+# PUT request
+PUT {{baseUrl}}/posts/{{userId}}
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {
+        "id": {{userId}},
+        "title": "Updated Post",
+        "body": "Updated content",
+        "userId": {{userId}}
+    }
+
+# DELETE request
+DELETE {{baseUrl}}/posts/{{userId}}

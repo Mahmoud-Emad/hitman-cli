@@ -1,0 +1,23 @@
+# Hitman Test File with Comments
+# This file demonstrates comment support in .hit files
+
+# ✅ Public GET request to list posts
+GET https://jsonplaceholder.typicode.com/posts
+
+# ✅ GET to httpbin (echo service)
+GET https://httpbin.org/get
+
+# ✅ Creates a user on reqres.in
+POST https://reqres.in/api/users
+    # Set the content type for JSON
+    WITH HEADER {Content-Type: application/json}
+    # User data in JSON format
+    WITH DATA {"name": "Mahmoud", "job": "Rust Developer"}
+
+# ✅ Login request - returns token if successful
+POST https://reqres.in/api/login
+    WITH HEADER {Content-Type: application/json}
+    # Login credentials
+    WITH DATA {"email": "eve.holt@reqres.in", "password": "cityslicka"}
+
+# End of test file

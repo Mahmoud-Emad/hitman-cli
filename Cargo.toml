@@ -1,0 +1,44 @@
+[package]
+name = "hitman"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mahmoud <mahmoud@example.com>"]
+description = "A lightweight HTTP testing tool that reads .hit files and executes HTTP requests with support for variables, comments, and parallel execution"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mahmoud/hitman"
+homepage = "https://github.com/mahmoud/hitman"
+documentation = "https://github.com/mahmoud/hitman/blob/main/README.md"
+readme = "README.md"
+keywords = ["http", "client", "api", "testing", "cli"]
+categories = ["command-line-utilities", "web-programming::http-client"]
+exclude = ["tests/fixtures/*", "target/*"]
+
+[[bin]]
+name = "hitman"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
+tokio = { version = "1.0", features = ["full"] }
+url = "2.4"
+colored = "2.0"
+atty = "0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+debug = true
+
+[target.'cfg(windows)'.dependencies]
+# Windows-specific dependencies if needed
+
+[target.'cfg(unix)'.dependencies]
+# Unix-specific dependencies if needed
