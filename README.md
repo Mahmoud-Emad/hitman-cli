@@ -38,7 +38,7 @@ A lightweight HTTP testing tool that reads `.hit` files and executes HTTP reques
 
 ### Pre-built Binaries (Recommended)
 
-Download the latest release for your platform from the [GitHub Releases](https://github.com/mahmoud/hitman/releases) page:
+Download the latest release for your platform from the [GitHub Releases](https://github.com/Mahmoud-Emad/hitman-cli/releases) page:
 
 - **Linux (x86_64)**: `hitman-linux-x86_64.tar.gz`
 - **Linux (x86_64, musl)**: `hitman-linux-x86_64-musl.tar.gz`
@@ -50,7 +50,7 @@ Download the latest release for your platform from the [GitHub Releases](https:/
 
 ```bash
 # Example for Linux x86_64
-curl -L https://github.com/mahmoud/hitman/releases/latest/download/hitman-linux-x86_64.tar.gz | tar xz
+curl -L https://github.com/Mahmoud-Emad/hitman-cli/releases/latest/download/hitman-linux-x86_64.tar.gz | tar xz
 sudo mv hitman /usr/local/bin/
 ```
 
@@ -62,7 +62,7 @@ cargo install hitman
 ### From Source
 ```bash
 # Clone the repository
-git clone https://github.com/mahmoud/hitman.git
+git clone https://github.com/Mahmoud-Emad/hitman-cli.git
 cd hitman
 
 # Build the project

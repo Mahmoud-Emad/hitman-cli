@@ -2,12 +2,12 @@
 name = "hitman"
 version = "0.1.0"
 edition = "2021"
-authors = ["Mahmoud <mahmoud@example.com>"]
+authors = ["Omdanii <mahmmoud.hassanein@gmail.com>"]
 description = "A lightweight HTTP testing tool that reads .hit files and executes HTTP requests with support for variables, comments, and parallel execution"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/mahmoud/hitman"
-homepage = "https://github.com/mahmoud/hitman"
-documentation = "https://github.com/mahmoud/hitman/blob/main/README.md"
+repository = "https://github.com/Mahmoud-Emad/hitman-cli"
+homepage = "https://github.com/Mahmoud-Emad/hitman-cli"
+documentation = "https://github.com/Mahmoud-Emad/hitman-cli/blob/development/README.md"
 readme = "README.md"
 keywords = ["http", "client", "api", "testing", "cli"]
 categories = ["command-line-utilities", "web-programming::http-client"]
