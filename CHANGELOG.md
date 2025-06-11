@@ -5,7 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2024-01-01
+## [0.1.2] - 2024-12-19
+
+### Fixed
+- **Cross-Compilation**: Resolved ARM64 Linux build errors in GitHub Actions
+- **Build System**: Improved cross-compilation setup using `cross` tool with Docker
+- **CI/CD**: Enhanced workflow reliability for multi-platform builds
+- **Platform Support**: Temporarily removed Windows ARM64 target for stability
+
+### Changed
+- **Docker Images**: Updated Cross.toml to use stable `main` images instead of `edge`
+- **Workflow**: Added proper Docker setup for cross-compilation environments
+- **Documentation**: Updated platform support information and build instructions
+
+### Technical
+- Uses `cross` tool for ARM64 and musl target compilation
+- Improved matrix strategy in GitHub Actions workflows
+- Better error handling in cross-compilation scenarios
+
+## [0.1.0]
+
+## [0.1.1] - 2024-12-19
+
+### Fixed
+- **Build System**: Resolved all clippy warnings for clean CI builds
+- **Cross-Compilation**: Fixed ARM64 Linux build errors using proper cross-compilation setup
+- **Code Quality**: Implemented proper Rust idioms and best practices
+  - Added `std::str::FromStr` trait implementation for `HttpMethod`
+  - Implemented `Display` trait for `VariableValue` instead of inherent `to_string`
+  - Used `#[derive(Default)]` for enums instead of manual implementations
+  - Converted loops to `while let` for better readability
+  - Fixed needless borrows and improved test assertions
+
+### Changed
+- **CI/CD**: Improved cross-compilation workflow using `cross` tool
+- **Platforms**: Temporarily removed Windows ARM64 target for stability
+- **Dependencies**: Updated cross-compilation Docker images to stable versions
+
+### Technical
+- All 58 tests continue to pass
+- Clippy clean with `-D warnings` flag
+- Better error messages and code organization - 2024-01-01
 
 ### Added
 - Initial release of Hitman HTTP testing tool
