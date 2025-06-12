@@ -9,7 +9,7 @@ GET https://api.example.com/users
     INVALID_CLAUSE {something: wrong}
 
 POST https://api.example.com/duplicate
-    WITH HEADER {Content-Type: application/json}
+    WITH HEADER {"Content-Type": "application/json"}
     WITH HEADER {Authorization: Bearer token}
 
 POST https://api.example.com/unknown

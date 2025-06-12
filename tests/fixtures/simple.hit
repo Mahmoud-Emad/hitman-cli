@@ -3,9 +3,9 @@ GET https://jsonplaceholder.typicode.com/posts
 GET https://httpbin.org/get
 
 POST https://reqres.in/api/users
-    WITH HEADER {Content-Type: application/json}
+    WITH HEADER {"Content-Type": "application/json"}
     WITH DATA {"name": "Mahmoud", "job": "Rust Developer"}
 
 POST https://reqres.in/api/login
-    WITH HEADER {Content-Type: application/json}
+    WITH HEADER {"Content-Type": "application/json"}
     WITH DATA {"email": "eve.holt@reqres.in", "password": "cityslicka"}

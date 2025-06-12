@@ -1,32 +1,31 @@
-DEFINE token="this is a token"
-DEFINE url="https://api.example.com"
-DEFINE number=123 # we can add inline comments
-DEFINE boolean=true; # We can add ; symbol or not so its flexible
+# Variable definitions with real API targets
+DEFINE token="QpwL5tke4Pnpja7X4"
+DEFINE url="https://reqres.in/api"
+DEFINE number=123
+DEFINE boolean=true;
 DEFINE headers={
     "Content-Type": "application/json",
-    "Authorization": "Bearer token"
+    "Authorization": "Bearer {{token}}"
 }
 DEFINE data={
     "test": true
 }
 
-# Simple GET request with variable
-GET {{url}}/test
+# Simple GET request with variable (jsonplaceholder)
+GET https://jsonplaceholder.typicode.com/posts
     WITH HEADER {{headers}}
-    WITH DATA {{data}}
 
-# Request with token
-GET https://api.example.com/test?token={{token}}
+# Request with token in query
+GET {{url}}/users?token={{token}}
 
-# Request with number
-GET https://api.example.com/test?number={{number}}
+# Request with number in query
+GET {{url}}/users?number={{number}}
 
-# Request with boolean
-GET https://api.example.com/test?boolean={{boolean}}
+# Request with boolean in query
+GET {{url}}/users?boolean={{boolean}}
 
-
-# All in the same block
-GET {{url}}/test
+# All in one block with variables
+POST {{url}}/users
     WITH HEADER {{headers}}
     WITH DATA {{data}}
     WITH QUERY {
@@ -35,18 +34,33 @@ GET {{url}}/test
         "boolean": {{boolean}}
     }
 
-
-# without variables
-GET https://api.example.com/test
+# Without variables - fully expanded
+POST https://reqres.in/api/users
     WITH HEADER {
         "Content-Type": "application/json",
-        "Authorization": "Bearer token"
+        "Authorization": "Bearer QpwL5tke4Pnpja7X4"
     }
     WITH DATA {
         "test": true
     }
     WITH QUERY {
-        "token": "this is a token",
+        "token": "QpwL5tke4Pnpja7X4",
         "number": 123,
         "boolean": true
+    }
+
+# Additional valid POST example
+POST https://reqres.in/api/register
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "email": "eve.holt@reqres.in",
+        "password": "pistol"
+    }
+
+# Valid GET example from httpbin
+GET https://httpbin.org/get
+    WITH QUERY {
+        "example": "value"
     }
