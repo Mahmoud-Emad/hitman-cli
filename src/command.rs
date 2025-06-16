@@ -19,6 +19,8 @@ pub struct HitCommand {
     pub query: HashMap<String, String>,
     /// Optional request body (typically JSON)
     pub body: Option<String>,
+    /// Optional alias for storing response (AS keyword)
+    pub alias: Option<String>,
 }
 
 /// Supported HTTP methods (restricted to the allowed set).
@@ -103,6 +105,18 @@ impl HitCommand {
         query: HashMap<String, String>,
         body: Option<String>,
     ) -> Result<Self> {
+        Self::new_with_alias(method, url, headers, query, body, None)
+    }
+
+    /// Create a new HTTP command with validation and optional alias.
+    pub fn new_with_alias(
+        method: &str,
+        url: &str,
+        headers: HashMap<String, String>,
+        query: HashMap<String, String>,
+        body: Option<String>,
+        alias: Option<String>,
+    ) -> Result<Self> {
         let method = method.parse::<HttpMethod>()?;
 
         // Validate URL using the url crate
@@ -129,6 +143,7 @@ impl HitCommand {
             headers,
             query,
             body,
+            alias,
         })
     }
 }

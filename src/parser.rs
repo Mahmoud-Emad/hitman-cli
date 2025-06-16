@@ -1,5 +1,6 @@
 //! Parser for .hit file format.
 
+use crate::assertion::{parse_assertion, Assertion};
 use crate::command::HitCommand;
 use crate::error::{HitError, Result};
 use crate::variables::VariableStore;
@@ -41,6 +42,7 @@ pub fn parse_block_with_variables(
     let mut headers = HashMap::new();
     let mut query = HashMap::new();
     let mut body = None;
+    let mut alias: Option<String> = None;
     let mut has_header_directive = false;
     let mut has_data_directive = false;
     let mut has_query_directive = false;
@@ -106,6 +108,27 @@ pub fn parse_block_with_variables(
             let (consumed_lines, complete_directive) = parse_multiline_directive(lines, i)?;
             parse_query_line(&complete_directive, line_number, &mut query, variables)?;
             i += consumed_lines;
+        } else if trimmed_line.starts_with("AS ") {
+            // Parse AS keyword for request aliasing
+            let parts: Vec<&str> = trimmed_line.split_whitespace().collect();
+            if parts.len() != 2 {
+                return Err(HitError::ParseError {
+                    line: line_number,
+                    reason: "AS directive must be followed by exactly one alias name".to_string(),
+                });
+            }
+            let alias_name = parts[1].to_string();
+
+            // Validate alias name (simple alphanumeric + underscore check)
+            if !alias_name.chars().all(|c| c.is_alphanumeric() || c == '_') {
+                return Err(HitError::ParseError {
+                    line: line_number,
+                    reason: format!("Invalid alias name '{}'. Alias names must contain only alphanumeric characters and underscores", alias_name),
+                });
+            }
+
+            alias = Some(alias_name);
+            i += 1;
         } else if trimmed_line.starts_with("WITH ") {
             // Unknown directive starting with "WITH "
             let directive = trimmed_line
@@ -131,7 +154,7 @@ pub fn parse_block_with_variables(
     let method = variables.substitute(method)?;
     let url = variables.substitute(url)?;
 
-    HitCommand::new(&method, &url, headers, query, body)
+    HitCommand::new_with_alias(&method, &url, headers, query, body, alias)
 }
 
 /// Parse a header line in the format "WITH HEADER {key: value, key2: value2}".
@@ -369,6 +392,61 @@ pub fn parse_file_with_variables(content: &str) -> Result<(Vec<Vec<String>>, Var
     }
 
     Ok((blocks, variables))
+}
+
+/// Parse a .hit file content into blocks, assertions, and variables.
+pub fn parse_file_with_assertions(
+    content: &str,
+) -> Result<(Vec<Vec<String>>, Vec<Assertion>, VariableStore)> {
+    // First, remove block comments while preserving line structure
+    let content_without_block_comments = remove_block_comments(content);
+    let lines: Vec<String> = content_without_block_comments
+        .lines()
+        .map(|s| s.to_string())
+        .collect();
+    let mut blocks = Vec::new();
+    let mut assertions = Vec::new();
+    let mut current_block = Vec::new();
+    let mut variables = VariableStore::new();
+    let mut i = 0;
+
+    while i < lines.len() {
+        let line = &lines[i];
+        let trimmed = line.trim();
+
+        if trimmed.is_empty() {
+            // Empty line - end current block if it has content
+            if !current_block.is_empty() {
+                // Only add blocks that contain at least one non-comment line
+                if has_non_comment_line(&current_block) {
+                    blocks.push(current_block);
+                }
+                current_block = Vec::new();
+            }
+            i += 1;
+        } else if trimmed.starts_with("DEFINE ") {
+            // Variable definition - might be multi-line JSON
+            let (consumed_lines, define_result) = parse_multiline_define(&lines, i)?;
+            variables.parse_define(&define_result, i + 1)?;
+            i += consumed_lines;
+        } else if trimmed.starts_with("ASSERT ") {
+            // Assertion statement
+            let assertion = parse_assertion(line, i + 1, &variables)?;
+            assertions.push(assertion);
+            i += 1;
+        } else {
+            // Non-empty line (including comments) - add to current block
+            current_block.push(line.clone());
+            i += 1;
+        }
+    }
+
+    // Don't forget the last block if file doesn't end with empty line
+    if !current_block.is_empty() && has_non_comment_line(&current_block) {
+        blocks.push(current_block);
+    }
+
+    Ok((blocks, assertions, variables))
 }
 
 /// Parse a potentially multi-line DEFINE statement.
@@ -991,13 +1069,85 @@ POST https://api.example.com/users
         ];
 
         let (consumed, result) = parse_multiline_directive(&lines, 0).unwrap();
-        println!("Consumed: {}", consumed);
-        println!("Result: {}", result);
 
         assert_eq!(consumed, 5);
         assert!(result.contains("WITH QUERY"));
         assert!(result.contains("{{token}}"));
         assert!(result.contains("{{number}}"));
         assert!(result.contains("{{boolean}}"));
+    }
+
+    #[test]
+    fn test_parse_request_with_alias() {
+        let lines = vec![
+            "GET https://api.example.com/users".to_string(),
+            "    AS request1".to_string(),
+        ];
+        let result = parse_block(&lines).unwrap();
+
+        assert_eq!(result.method.to_string(), "GET");
+        assert_eq!(result.url, "https://api.example.com/users");
+        assert_eq!(result.alias, Some("request1".to_string()));
+    }
+
+    #[test]
+    fn test_parse_request_with_alias_and_headers() {
+        let lines = vec![
+            "POST https://api.example.com/users".to_string(),
+            "    WITH HEADER {Content-Type: application/json}".to_string(),
+            "    WITH DATA {\"name\": \"John\"}".to_string(),
+            "    AS user_creation".to_string(),
+        ];
+        let result = parse_block(&lines).unwrap();
+
+        assert_eq!(result.method.to_string(), "POST");
+        assert_eq!(result.url, "https://api.example.com/users");
+        assert_eq!(result.alias, Some("user_creation".to_string()));
+        assert_eq!(
+            result.headers.get("Content-Type"),
+            Some(&"application/json".to_string())
+        );
+        assert_eq!(result.body, Some("{\"name\": \"John\"}".to_string()));
+    }
+
+    #[test]
+    fn test_parse_file_with_assertions() {
+        let content = r#"
+DEFINE baseUrl="https://api.example.com"
+
+GET {{baseUrl}}/users
+    AS request1
+
+ASSERT request1.status == 200
+ASSERT request1.headers.Content-Type == "application/json"
+
+POST {{baseUrl}}/users
+    WITH DATA {"name": "John"}
+    AS request2
+
+ASSERT request2.status == 201
+"#;
+
+        let (blocks, assertions, variables) = parse_file_with_assertions(content).unwrap();
+
+        assert_eq!(blocks.len(), 2);
+        assert_eq!(assertions.len(), 3);
+        assert!(variables.contains("baseUrl"));
+
+        // Check first assertion
+        assert_eq!(assertions[0].alias, "request1");
+        assert_eq!(assertions[0].property_path, "status");
+        assert_eq!(
+            assertions[0].operator,
+            crate::assertion::AssertionOperator::Equals
+        );
+
+        // Check second assertion
+        assert_eq!(assertions[1].alias, "request1");
+        assert_eq!(assertions[1].property_path, "headers.Content-Type");
+
+        // Check third assertion
+        assert_eq!(assertions[2].alias, "request2");
+        assert_eq!(assertions[2].property_path, "status");
     }
 }

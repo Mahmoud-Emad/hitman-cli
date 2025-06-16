@@ -4,6 +4,8 @@ use crate::command::{HitCommand, HttpMethod};
 use crate::error::{HitError, Result};
 use colored::*;
 use reqwest::Client;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 /// HTTP request executor.
@@ -21,6 +23,34 @@ pub struct ResponseInfo {
     pub body: String,
     pub duration: Duration,
     pub size: usize,
+}
+
+/// Response information for assertions and storage.
+#[derive(Debug, Clone)]
+pub struct HitmanResponse {
+    pub status: u16,
+    pub headers: HashMap<String, String>,
+    pub body_raw: String,
+    pub body_json: Option<Value>,
+    pub elapsed_ms: u64,
+}
+
+impl From<&ResponseInfo> for HitmanResponse {
+    fn from(response: &ResponseInfo) -> Self {
+        // Convert headers from Vec<(String, String)> to HashMap<String, String>
+        let headers: HashMap<String, String> = response.headers.iter().cloned().collect();
+
+        // Try to parse body as JSON
+        let body_json = serde_json::from_str::<Value>(&response.body).ok();
+
+        Self {
+            status: response.status,
+            headers,
+            body_raw: response.body.clone(),
+            body_json,
+            elapsed_ms: response.duration.as_millis() as u64,
+        }
+    }
 }
 
 impl HttpExecutor {

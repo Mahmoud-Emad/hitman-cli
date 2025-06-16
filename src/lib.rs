@@ -23,6 +23,7 @@
 //! - Multiple headers: Comma-separated key-value pairs in `WITH HEADER`
 //! - JSON validation: `WITH DATA` content is validated as JSON
 
+pub mod assertion;
 pub mod command;
 pub mod error;
 pub mod executor;
@@ -30,11 +31,13 @@ pub mod parser;
 pub mod report;
 pub mod variables;
 
+pub use assertion::{evaluate_assertion, parse_assertion, Assertion, AssertionResult};
 pub use command::HitCommand;
 pub use error::{HitError, Result};
-pub use executor::{HttpExecutor, ResponseInfo};
+pub use executor::{HitmanResponse, HttpExecutor, ResponseInfo};
 pub use parser::{
-    parse_block, parse_block_with_variables, parse_file_into_blocks, parse_file_with_variables,
+    parse_block, parse_block_with_variables, parse_file_into_blocks, parse_file_with_assertions,
+    parse_file_with_variables,
 };
 pub use report::ExecutionReport;
 pub use variables::{VariableStore, VariableValue};

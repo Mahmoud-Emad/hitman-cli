@@ -46,7 +46,7 @@ fn test_cli_version() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("hitman 0.1.0"));
+    assert!(stdout.contains("hitman 0.1.4"));
 }
 
 #[test]

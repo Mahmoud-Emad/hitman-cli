@@ -57,4 +57,20 @@ pub enum HitError {
     /// URL parsing error.
     #[error("Invalid URL format: {source}")]
     UrlParseError { source: url::ParseError },
+
+    /// Assertion evaluation error.
+    #[error("Assertion failed at line {line}: {reason}")]
+    AssertionError { line: usize, reason: String },
+
+    /// Undefined alias referenced in assertion.
+    #[error("Undefined alias '{alias}' referenced in assertion at line {line}")]
+    UndefinedAlias { alias: String, line: usize },
+
+    /// Invalid property path in assertion.
+    #[error("Invalid property path '{path}' in assertion at line {line}: {reason}")]
+    InvalidPropertyPath {
+        path: String,
+        line: usize,
+        reason: String,
+    },
 }

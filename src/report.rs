@@ -1,5 +1,6 @@
 //! Execution report generation for Hitman.
 
+use crate::assertion::AssertionResult;
 use crate::command::HitCommand;
 use crate::error::HitError;
 use crate::executor::ResponseInfo;
@@ -24,6 +25,12 @@ pub struct ExecutionReport {
     pub total_duration_ms: u64,
     /// Individual request results
     pub requests: Vec<RequestResult>,
+    /// Number of passed assertions
+    pub passed_assertions: usize,
+    /// Number of failed assertions
+    pub failed_assertions: usize,
+    /// Individual assertion results
+    pub assertions: Vec<SerializableAssertionResult>,
 }
 
 /// Result of a single HTTP request.
@@ -47,6 +54,20 @@ pub struct SerializableCommand {
     pub headers: std::collections::HashMap<String, String>,
     pub query: std::collections::HashMap<String, String>,
     pub body: Option<String>,
+    pub alias: Option<String>,
+}
+
+/// Serializable version of AssertionResult for reports.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SerializableAssertionResult {
+    pub alias: String,
+    pub property_path: String,
+    pub operator: String,
+    pub expected_value: String,
+    pub actual_value: Option<String>,
+    pub passed: bool,
+    pub error_message: Option<String>,
+    pub line_number: usize,
 }
 
 impl From<&HitCommand> for SerializableCommand {
@@ -57,6 +78,26 @@ impl From<&HitCommand> for SerializableCommand {
             headers: cmd.headers.clone(),
             query: cmd.query.clone(),
             body: cmd.body.clone(),
+            alias: cmd.alias.clone(),
+        }
+    }
+}
+
+impl From<&AssertionResult> for SerializableAssertionResult {
+    fn from(result: &AssertionResult) -> Self {
+        SerializableAssertionResult {
+            alias: result.assertion.alias.clone(),
+            property_path: result.assertion.property_path.clone(),
+            operator: match result.assertion.operator {
+                crate::assertion::AssertionOperator::Equals => "==".to_string(),
+                crate::assertion::AssertionOperator::NotEquals => "!=".to_string(),
+                crate::assertion::AssertionOperator::Contains => "CONTAINS".to_string(),
+            },
+            expected_value: format!("{:?}", result.assertion.expected_value),
+            actual_value: result.actual_value.clone(),
+            passed: result.passed,
+            error_message: result.error_message.clone(),
+            line_number: result.assertion.line_number,
         }
     }
 }
@@ -97,6 +138,9 @@ impl ExecutionReport {
             failed_requests: 0,
             total_duration_ms: 0,
             requests: Vec::new(),
+            passed_assertions: 0,
+            failed_assertions: 0,
+            assertions: Vec::new(),
         }
     }
 
@@ -180,6 +224,16 @@ impl ExecutionReport {
         };
 
         self.requests.push(result);
+    }
+
+    /// Add an assertion result.
+    pub fn add_assertion_result(&mut self, result: &AssertionResult) {
+        if result.passed {
+            self.passed_assertions += 1;
+        } else {
+            self.failed_assertions += 1;
+        }
+        self.assertions.push(result.into());
     }
 
     /// Finalize the report with total counts.

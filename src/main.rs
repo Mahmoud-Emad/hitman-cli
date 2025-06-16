@@ -2,8 +2,10 @@
 
 use clap::{Parser, ValueEnum};
 use hitman::{
-    parse_block_with_variables, parse_file_with_variables, ExecutionReport, HitError, HttpExecutor,
+    evaluate_assertion, parse_block_with_variables, parse_file_with_assertions, ExecutionReport,
+    HitError, HitmanResponse, HttpExecutor,
 };
+use std::collections::HashMap;
 use std::fs;
 use std::io::{self, Read};
 use std::process;
@@ -38,7 +40,7 @@ pub enum LogLevel {
 #[derive(Parser)]
 #[command(name = "hitman")]
 #[command(about = "A simple HTTP client for executing .hit files")]
-#[command(version = "0.1.0")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(
     long_about = "Hitman is a lightweight HTTP testing tool that reads .hit files and executes HTTP requests. \
 Each .hit file contains simplified request blocks with support for headers, JSON data, and comments."
@@ -175,7 +177,10 @@ async fn main() {
                 | HitError::InvalidUrl { .. }
                 | HitError::EmptyBlock
                 | HitError::DuplicateDirective { .. }
-                | HitError::UnknownDirective { .. } => 1, // Parse/syntax errors
+                | HitError::UnknownDirective { .. }
+                | HitError::AssertionError { .. }
+                | HitError::UndefinedAlias { .. }
+                | HitError::InvalidPropertyPath { .. } => 1, // Parse/syntax errors
                 HitError::RequestError { .. } | HitError::FileRead { .. } => 2, // Runtime/network errors
                 HitError::UrlParseError { .. } => 1,                            // Parse errors
             };
@@ -213,13 +218,14 @@ async fn run(cli: &Cli) -> Result<(), HitError> {
         (content, file_path.clone())
     };
 
-    // Parse file with variables
-    let (blocks, mut variables) = parse_file_with_variables(&content).map_err(|e| {
-        if !cli.quiet {
-            eprintln!("❌ Failed to parse file: {}", e);
-        }
-        e
-    })?;
+    // Parse file with variables and assertions
+    let (blocks, assertions, mut variables) =
+        parse_file_with_assertions(&content).map_err(|e| {
+            if !cli.quiet {
+                eprintln!("❌ Failed to parse file: {}", e);
+            }
+            e
+        })?;
 
     // Process command line variable overrides
     if !cli.define.is_empty() {
@@ -279,6 +285,9 @@ async fn run(cli: &Cli) -> Result<(), HitError> {
     let executor = HttpExecutor::new(cli.timeout, use_colors);
     let mut successful_requests = 0;
     let mut failed_requests = 0;
+
+    // Storage for responses by alias for assertions
+    let mut responses: HashMap<String, HitmanResponse> = HashMap::new();
 
     // Determine logging level
     let detailed_logging = cli.verbose || matches!(cli.log, LogLevel::Debug | LogLevel::Info);
@@ -418,6 +427,12 @@ async fn run(cli: &Cli) -> Result<(), HitError> {
                                 }
                                 successful_requests += 1;
 
+                                // Store response if command has an alias
+                                if let Some(ref alias) = command.alias {
+                                    responses
+                                        .insert(alias.clone(), HitmanResponse::from(&response));
+                                }
+
                                 // Add to report
                                 if let Some(ref mut report) = report {
                                     report.add_success(block_number, &command, &response);
@@ -495,6 +510,66 @@ async fn run(cli: &Cli) -> Result<(), HitError> {
                 println!();
             }
         }
+    }
+
+    // Execute assertions if any were found
+    if !assertions.is_empty() && !cli.dry_run {
+        if !cli.quiet {
+            println!("🔍 Executing {} assertion(s)...", assertions.len());
+            println!();
+        }
+
+        let mut passed_assertions = 0;
+        let mut failed_assertions = 0;
+
+        for assertion in &assertions {
+            let result = evaluate_assertion(assertion, &responses, &variables);
+
+            if result.passed {
+                passed_assertions += 1;
+                if detailed_logging {
+                    println!(
+                        "✅ ASSERT {}.{} == {:?} (PASSED)",
+                        assertion.alias, assertion.property_path, assertion.expected_value
+                    );
+                }
+            } else {
+                failed_assertions += 1;
+                if !cli.quiet {
+                    println!(
+                        "❌ ASSERT {}.{} == {:?} (FAILED)",
+                        assertion.alias, assertion.property_path, assertion.expected_value
+                    );
+                    if let Some(ref error_msg) = result.error_message {
+                        println!("   {}", error_msg);
+                    }
+                }
+
+                // Exit immediately if strict mode is enabled
+                if cli.strict {
+                    eprintln!("❌ Strict mode: stopping execution due to assertion failure");
+                    process::exit(3);
+                }
+            }
+
+            // Add assertion result to report
+            if let Some(ref mut report) = report {
+                report.add_assertion_result(&result);
+            }
+        }
+
+        if !cli.quiet {
+            println!();
+            println!("🔍 Assertion Summary:");
+            println!("  ✅ Passed: {}", passed_assertions);
+            if failed_assertions > 0 {
+                println!("  ❌ Failed: {}", failed_assertions);
+            }
+            println!();
+        }
+
+        // Update failed_requests count to include assertion failures
+        failed_requests += failed_assertions;
     }
 
     // Print summary

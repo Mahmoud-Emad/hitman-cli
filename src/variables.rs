@@ -402,8 +402,6 @@ mod tests {
         let input =
             r#"WITH QUERY { "token": "{{token}}", "number": {{number}}, "boolean": {{boolean}} }"#;
         let result = store.substitute(input).unwrap();
-        println!("Input: {}", input);
-        println!("Result: {}", result);
 
         let expected = r#"WITH QUERY { "token": "test_token", "number": 123, "boolean": true }"#;
         assert_eq!(result, expected);
@@ -422,12 +420,6 @@ mod tests {
         let inside_content =
             r#""token": "{{token}}", "number": {{number}}, "boolean": {{boolean}}"#;
         let result = store.substitute(inside_content);
-
-        println!("Inside content: {}", inside_content);
-        match &result {
-            Ok(r) => println!("Result: {}", r),
-            Err(e) => println!("Error: {}", e),
-        }
 
         assert!(result.is_ok());
         let expected = r#""token": "this is a token", "number": 123, "boolean": true"#;

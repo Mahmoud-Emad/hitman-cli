@@ -1,0 +1,113 @@
+# Comprehensive Assertion Example for Hitman CLI
+# This file demonstrates all assertion features including:
+# - AS keyword for request aliasing
+# - Status code assertions
+# - Header assertions
+# - JSON property assertions
+# - Body content assertions
+# - Variable substitution in assertions
+
+# Define variables for reuse
+DEFINE baseUrl="https://jsonplaceholder.typicode.com"
+DEFINE userId=1
+DEFINE expectedContentType="application/json; charset=utf-8"
+
+# Test 1: Get all posts and verify response structure
+GET {{baseUrl}}/posts
+    AS getAllPosts
+
+ASSERT getAllPosts.status == 200
+ASSERT getAllPosts.headers.Content-Type == {{expectedContentType}}
+ASSERT getAllPosts.body CONTAINS "userId"
+
+# Test 2: Get posts for a specific user
+GET {{baseUrl}}/posts
+    WITH QUERY {"userId": {{userId}}}
+    AS getUserPosts
+
+ASSERT getUserPosts.status == 200
+ASSERT getUserPosts.headers.Content-Type == {{expectedContentType}}
+ASSERT getUserPosts.json.0.userId == {{userId}}
+
+# Test 3: Get a specific post
+GET {{baseUrl}}/posts/1
+    AS getPost
+
+ASSERT getPost.status == 200
+ASSERT getPost.headers.Content-Type == {{expectedContentType}}
+ASSERT getPost.json.id == 1
+ASSERT getPost.json.userId == {{userId}}
+ASSERT getPost.json.title != null
+ASSERT getPost.json.body CONTAINS "quia"
+
+# Test 4: Create a new post
+POST {{baseUrl}}/posts
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {
+        "title": "Test Post",
+        "body": "This is a test post created by Hitman CLI",
+        "userId": {{userId}}
+    }
+    AS createPost
+
+ASSERT createPost.status == 201
+ASSERT createPost.headers.Content-Type == {{expectedContentType}}
+ASSERT createPost.json.title == "Test Post"
+ASSERT createPost.json.body CONTAINS "test post"
+ASSERT createPost.json.userId == {{userId}}
+ASSERT createPost.json.id != null
+
+# Test 5: Update a post
+PUT {{baseUrl}}/posts/1
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {
+        "id": 1,
+        "title": "Updated Post Title",
+        "body": "This post has been updated",
+        "userId": {{userId}}
+    }
+    AS updatePost
+
+ASSERT updatePost.status == 200
+ASSERT updatePost.headers.Content-Type == {{expectedContentType}}
+ASSERT updatePost.json.title == "Updated Post Title"
+ASSERT updatePost.json.body CONTAINS "updated"
+ASSERT updatePost.json.id == 1
+
+# Test 6: Delete a post
+DELETE {{baseUrl}}/posts/1
+    AS deletePost
+
+ASSERT deletePost.status == 200
+
+# Test 7: Try to get deleted post (should still return 200 in JSONPlaceholder)
+GET {{baseUrl}}/posts/1
+    AS getDeletedPost
+
+ASSERT getDeletedPost.status == 200
+
+# Test 8: Get user information
+GET {{baseUrl}}/users/{{userId}}
+    AS getUser
+
+ASSERT getUser.status == 200
+ASSERT getUser.headers.Content-Type == {{expectedContentType}}
+ASSERT getUser.json.id == {{userId}}
+ASSERT getUser.json.name != null
+ASSERT getUser.json.email CONTAINS "@"
+ASSERT getUser.json.address.city != null
+
+# Test 9: Get comments for a post
+GET {{baseUrl}}/posts/1/comments
+    AS getComments
+
+ASSERT getComments.status == 200
+ASSERT getComments.headers.Content-Type == {{expectedContentType}}
+ASSERT getComments.json.0.postId == 1
+ASSERT getComments.json.0.email CONTAINS "@"
+
+# Test 10: Invalid endpoint (should return 404)
+GET {{baseUrl}}/invalid-endpoint
+    AS invalidRequest
+
+ASSERT invalidRequest.status == 404

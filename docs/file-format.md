@@ -7,7 +7,8 @@ The `.hit` file format is designed to be simple, readable, and powerful for HTTP
 A `.hit` file consists of:
 1. **Variable definitions** (optional)
 2. **HTTP request blocks**
-3. **Comments** (optional)
+3. **Assertions** (optional)
+4. **Comments** (optional)
 
 ```hit
 # Variable definitions
@@ -230,6 +231,107 @@ DEFINE endpoint="users"
 GET {{protocol}}://{{host}}/{{version}}/{{endpoint}}
 ```
 
+## Request Aliasing and Assertions
+
+### Request Aliasing
+
+Use the `AS` keyword to assign an alias to a request for later reference in assertions:
+
+```hit
+GET https://api.example.com/users/1
+    AS getUserRequest
+
+POST https://api.example.com/users
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {"name": "John", "email": "john@example.com"}
+    AS createUserRequest
+```
+
+### Assertions
+
+Assertions validate HTTP responses using the `ASSERT` keyword. They reference aliased requests and support various property access patterns.
+
+#### Basic Syntax
+```hit
+ASSERT alias.property operator expected_value
+```
+
+#### Supported Operators
+- `==` - Equals
+- `!=` - Not equals
+- `CONTAINS` - String contains (for body and string values)
+
+#### Property Access Patterns
+
+##### Status Code
+```hit
+GET https://api.example.com/users
+    AS request1
+
+ASSERT request1.status == 200
+ASSERT request1.status != 404
+```
+
+##### Headers
+```hit
+GET https://api.example.com/users
+    AS request1
+
+ASSERT request1.headers.Content-Type == "application/json"
+ASSERT request1.headers.Content-Type CONTAINS "json"
+```
+
+##### JSON Response Properties
+```hit
+GET https://api.example.com/users/1
+    AS request1
+
+ASSERT request1.json.id == 1
+ASSERT request1.json.name == "John Doe"
+ASSERT request1.json.profile.age == 30
+ASSERT request1.json.tags.0 == "admin"
+```
+
+##### Response Body
+```hit
+GET https://api.example.com/status
+    AS request1
+
+ASSERT request1.body CONTAINS "success"
+ASSERT request1.body == "OK"
+```
+
+#### Complete Example with Assertions
+```hit
+DEFINE baseUrl="https://api.example.com"
+DEFINE userId=1
+
+# Get user information
+GET {{baseUrl}}/users/{{userId}}
+    AS getUser
+
+# Validate the response
+ASSERT getUser.status == 200
+ASSERT getUser.headers.Content-Type CONTAINS "application/json"
+ASSERT getUser.json.id == {{userId}}
+ASSERT getUser.json.name != null
+ASSERT getUser.json.email CONTAINS "@"
+
+# Create a new user
+POST {{baseUrl}}/users
+    WITH HEADER {"Content-Type": "application/json"}
+    WITH DATA {
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+    }
+    AS createUser
+
+# Validate creation
+ASSERT createUser.status == 201
+ASSERT createUser.json.name == "Jane Doe"
+ASSERT createUser.json.id != null
+```
+
 ## Best Practices
 
 ### Organization
@@ -275,3 +377,7 @@ GET {{baseUrl}}/users/999999     # Non-existent user
 4. **Variable references** must be defined before use
 5. **HTTP methods** must be supported
 6. **Clause order** doesn't matter within a request block
+7. **Alias names** must contain only alphanumeric characters and underscores
+8. **Assertion syntax** must use valid operators (==, !=, CONTAINS)
+9. **Assertion references** must point to existing request aliases
+10. **Property paths** in assertions must be valid (status, headers.name, json.path, body)
