@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-06-16
+
+### 🎯 Major Features Added
+
+#### Assertion System
+- **NEW**: Complete assertion system for response validation
+- **NEW**: Request aliasing with `AS` keyword for referencing responses
+- **NEW**: Support for status code assertions (`ASSERT alias.status == 200`)
+- **NEW**: Header validation (`ASSERT alias.headers.Content-Type CONTAINS "json"`)
+- **NEW**: JSON property assertions with nested access (`ASSERT alias.json.user.id == 1`)
+- **NEW**: Response body content validation (`ASSERT alias.body CONTAINS "success"`)
+- **NEW**: Multiple assertion operators: `==`, `!=`, `CONTAINS`
+- **NEW**: Array element access in JSON assertions (`ASSERT alias.json.items.0.name == "test"`)
+
+### ✨ Enhanced Features
+
+#### Parser Improvements
+- **IMPROVED**: Enhanced error messages with line numbers and context
+- **IMPROVED**: Better handling of multi-line JSON in directives
+- **IMPROVED**: More robust variable substitution in complex JSON structures
+- **IMPROVED**: Support for nested JSON property access
+
+#### CLI Enhancements
+- **IMPROVED**: Better error reporting with specific exit codes
+- **IMPROVED**: Enhanced verbose output with assertion results
+- **IMPROVED**: Improved strict mode behavior for assertions
+- **IMPROVED**: Better handling of parallel execution with assertions
+
+#### Documentation
+- **IMPROVED**: Complete documentation update with assertion examples
+- **IMPROVED**: Updated file format specification
+- **IMPROVED**: Enhanced CLI reference with all new options
+- **IMPROVED**: Added comprehensive usage examples
+
+### 🔧 Technical Improvements
+
+#### Code Quality
+- **IMPROVED**: Modular architecture with separate assertion module
+- **IMPROVED**: Enhanced error handling with detailed error types
+- **IMPROVED**: Better memory management for response storage
+- **IMPROVED**: Improved type safety throughout the codebase
+
+#### Testing
+- **IMPROVED**: Comprehensive test coverage for assertion system (72 total tests)
+- **IMPROVED**: Enhanced integration tests for CLI behavior
+- **IMPROVED**: Better edge case coverage in parser tests
+- **IMPROVED**: Improved test organization and maintainability
+
+### 🐛 Bug Fixes
+- **FIXED**: Version synchronization between CLI and Cargo.toml
+- **FIXED**: Improved handling of header case sensitivity
+- **FIXED**: Better error messages for undefined variables
+- **FIXED**: Enhanced validation for malformed JSON in requests
+
+### 📚 Documentation Updates
+- **UPDATED**: README with assertion examples and new features
+- **UPDATED**: File format specification with complete assertion syntax
+- **UPDATED**: CLI reference with all command-line options
+- **UPDATED**: Installation and usage guides
+- **ADDED**: Comprehensive examples directory
+
+### 🔄 Breaking Changes
+- None - This release is fully backward compatible with 0.1.x
+
 ## [0.1.4] - 2024-12-19
 
 ### Fixed
