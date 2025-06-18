@@ -1,0 +1,176 @@
+# REST API CRUD Operations Example
+# Demonstrates complete CRUD (Create, Read, Update, Delete) operations
+#
+# This example shows:
+# - Creating resources with POST
+# - Reading resources with GET
+# - Updating resources with PUT/PATCH
+# - Deleting resources with DELETE
+# - Proper HTTP status code handling
+# - JSON payload management
+#
+# Usage:
+#   hitman examples/rest-api-crud.hit
+
+# ===== CONFIGURATION =====
+DEFINE baseUrl="https://jsonplaceholder.typicode.com"
+DEFINE httpbinUrl="https://httpbin.org"
+
+
+# Test data for CRUD operations
+DEFINE newPost={
+    "title": "My New Post",
+    "body": "This is the content of my new post created via Hitman CLI",
+    "userId": 1
+}
+
+DEFINE updatedPost={
+    "id": 1,
+    "title": "Updated Post Title",
+    "body": "This post has been updated using PUT request",
+    "userId": 1
+}
+
+DEFINE patchData={
+    "title": "Partially Updated Title"
+}
+
+# ===== CREATE (POST) =====
+
+# Create a new post
+POST {{baseUrl}}/posts
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {{newPost}}
+    AS createPost
+
+# Create a new user
+POST {{baseUrl}}/users
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "name": "John Doe",
+        "username": "johndoe",
+        "email": "john.doe@example.com",
+        "phone": "1-555-123-4567",
+        "website": "johndoe.com"
+    }
+    AS createUser
+
+# ===== READ (GET) =====
+
+# Read all posts
+GET {{baseUrl}}/posts AS getAllPosts
+
+# Read specific post
+GET {{baseUrl}}/posts/1 AS getPost
+
+# Read posts by user
+GET {{baseUrl}}/posts
+    WITH QUERY {
+        "userId": "1"
+    }
+    AS getPostsByUser
+
+# Read user details
+GET {{baseUrl}}/users/1 AS getUser
+
+# ===== UPDATE (PUT) =====
+
+# Update entire post with PUT
+PUT {{baseUrl}}/posts/1
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {{updatedPost}}
+    AS updatePostPut
+
+# Update user with PUT
+PUT {{baseUrl}}/users/1
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "id": 1,
+        "name": "Jane Doe",
+        "username": "janedoe",
+        "email": "jane.doe@example.com",
+        "phone": "1-555-987-6543",
+        "website": "janedoe.com"
+    }
+    AS updateUser
+
+# ===== PARTIAL UPDATE (PATCH) =====
+
+# Partial update with PATCH
+PATCH {{baseUrl}}/posts/1
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {{patchData}}
+    AS patchPost
+
+# ===== DELETE =====
+
+# Delete a post
+DELETE {{baseUrl}}/posts/1 AS deletePost
+
+# Delete a user
+DELETE {{baseUrl}}/users/1 AS deleteUser
+
+# ===== ADDITIONAL CRUD PATTERNS =====
+
+# Bulk operations simulation
+POST {{httpbinUrl}}/post
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "operation": "bulk_create",
+        "items": [
+            {"name": "Item 1", "type": "A"},
+            {"name": "Item 2", "type": "B"},
+            {"name": "Item 3", "type": "A"}
+        ]
+    }
+    AS bulkCreate
+
+# Search/Filter simulation
+GET {{baseUrl}}/posts
+    WITH QUERY {
+        "userId": "1",
+        "_limit": "5"
+    }
+    AS searchPosts
+
+# ===== ASSERTIONS =====
+
+# CREATE assertions
+ASSERT createPost.status == 201
+ASSERT createUser.status == 201
+
+# READ assertions
+ASSERT getAllPosts.status == 200
+ASSERT getPost.status == 200
+ASSERT getPostsByUser.status == 200
+ASSERT getUser.status == 200
+
+# UPDATE assertions
+ASSERT updatePostPut.status == 200
+ASSERT updateUser.status == 200
+ASSERT patchPost.status == 200
+
+# DELETE assertions
+ASSERT deletePost.status == 200
+ASSERT deleteUser.status == 200
+
+# Content assertions
+ASSERT getPost.json.id == 1
+ASSERT getPost.json.userId == 1
+ASSERT getUser.json.id == 1
+
+# Bulk and search assertions
+ASSERT bulkCreate.status == 200
+ASSERT searchPosts.status == 200

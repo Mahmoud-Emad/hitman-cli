@@ -1,0 +1,231 @@
+# Real-World API Testing Example
+# This file demonstrates Hitman CLI with actual public APIs
+# 
+# This example shows comprehensive testing scenarios including:
+# - Multiple public APIs (JSONPlaceholder, HTTPBin, ReqRes)
+# - All HTTP methods (GET, POST, PUT, DELETE)
+# - Variable substitution and complex JSON objects
+# - Authentication patterns (Basic Auth, Bearer tokens)
+# - Response validation and assertions
+# - Error handling for different status codes
+# - Automatic User-Agent header (added by Hitman CLI)
+# 
+# Usage:
+#   hitman examples/real-world-api-testing.hit
+#   hitman examples/real-world-api-testing.hit --parallel
+#   hitman examples/real-world-api-testing.hit --report results.json
+
+# ===== CONFIGURATION =====
+DEFINE jsonPlaceholderBase="https://jsonplaceholder.typicode.com"
+DEFINE httpbinBase="https://httpbin.org"
+DEFINE reqresBase="https://reqres.in/api"
+
+# Test data
+DEFINE testUser={
+    "name": "John Doe",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "phone": "1-770-736-8031",
+    "website": "hildegard.org"
+}
+
+DEFINE loginData={
+    "email": "eve.holt@reqres.in",
+    "password": "cityslicka"
+}
+
+# ===== BASIC GET REQUESTS =====
+
+# Test 1: Get all posts from JSONPlaceholder
+GET {{jsonPlaceholderBase}}/posts
+    WITH HEADER {
+        "Accept": "application/json"
+    }
+    AS allPosts
+
+# Test 2: Get specific post with query parameters
+GET {{jsonPlaceholderBase}}/posts
+    WITH QUERY {
+        "userId": "1"
+    }
+    AS userPosts
+
+# Test 3: Get single post by ID
+GET {{jsonPlaceholderBase}}/posts/1 AS singlePost
+
+# Test 4: Get user information
+GET {{jsonPlaceholderBase}}/users/1 AS userInfo
+
+# ===== HTTP TESTING WITH HTTPBIN =====
+
+# Test 5: Test HTTP methods with httpbin
+GET {{httpbinBase}}/get
+    WITH QUERY {
+        "param1": "value1",
+        "param2": "value2"
+    }
+    WITH HEADER {
+        "X-Test-Header": "test-value"
+    }
+    AS httpbinGet
+
+# Test 6: POST request with JSON data
+POST {{httpbinBase}}/post
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "message": "Hello from Hitman!",
+        "timestamp": "2024-01-01T00:00:00Z",
+        "data": {{testUser}}
+    }
+    AS httpbinPost
+
+# Test 7: PUT request
+PUT {{httpbinBase}}/put
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "id": 1,
+        "action": "update",
+        "user": {{testUser}}
+    }
+    AS httpbinPut
+
+# Test 8: DELETE request
+DELETE {{httpbinBase}}/delete
+    WITH HEADER {
+        "Authorization": "Bearer fake-token-for-demo"
+    }
+    AS httpbinDelete
+
+# ===== AUTHENTICATION TESTING =====
+
+# Test 9: Basic Auth test
+GET {{httpbinBase}}/basic-auth/user/passwd
+    WITH HEADER {
+        "Authorization": "Basic dXNlcjpwYXNzd2Q="
+    }
+    AS basicAuth
+
+# Test 10: Bearer token test
+GET {{httpbinBase}}/bearer
+    WITH HEADER {
+        "Authorization": "Bearer test-token-123"
+    }
+    AS bearerAuth
+
+# ===== REQRES API TESTING =====
+
+# Test 11: Get users list
+GET {{reqresBase}}/users
+    WITH QUERY {
+        "page": "2"
+    }
+    AS reqresUsers
+
+# Test 12: Create new user
+POST {{reqresBase}}/users
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "name": "morpheus",
+        "job": "leader"
+    }
+    AS createUser
+
+# Test 13: Login attempt
+POST {{reqresBase}}/login
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {{loginData}}
+    AS loginAttempt
+
+# Test 14: Update user
+PUT {{reqresBase}}/users/2
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "name": "morpheus",
+        "job": "zion resident"
+    }
+    AS updateUser
+
+# ===== STATUS CODE TESTING =====
+
+# Test 15: Test different status codes
+GET {{httpbinBase}}/status/200 AS status200
+
+# Test 16: Not found status
+GET {{httpbinBase}}/status/404 AS status404
+
+# Test 17: Server error status
+GET {{httpbinBase}}/status/500 AS status500
+
+# ===== RESPONSE FORMAT TESTING =====
+
+# Test 18: JSON response
+GET {{httpbinBase}}/json
+    WITH HEADER {
+        "Accept": "application/json"
+    }
+    AS jsonResponse
+
+# Test 19: XML response
+GET {{httpbinBase}}/xml
+    WITH HEADER {
+        "Accept": "application/xml"
+    }
+    AS xmlResponse
+
+# Test 20: HTML response
+GET {{httpbinBase}}/html
+    WITH HEADER {
+        "Accept": "text/html"
+    }
+    AS htmlResponse
+
+# ===== DELAY AND TIMEOUT TESTING =====
+
+# Test 21: Delayed response (2 seconds)
+GET {{httpbinBase}}/delay/2 AS delayedResponse
+
+# Test 22: Headers echo test
+GET {{httpbinBase}}/headers
+    WITH HEADER {
+        "X-Custom-Header": "custom-value",
+        "X-Test-ID": "12345"
+    }
+    AS headersEcho
+
+# ===== ASSERTIONS (if supported) =====
+
+# Basic status code assertions
+ASSERT allPosts.status == 200
+ASSERT singlePost.status == 200
+ASSERT userInfo.status == 200
+ASSERT httpbinGet.status == 200
+ASSERT httpbinPost.status == 200
+ASSERT createUser.status == 201
+ASSERT loginAttempt.status == 200
+ASSERT status200.status == 200
+ASSERT status404.status == 404
+ASSERT status500.status == 500
+
+# Content type assertions
+ASSERT jsonResponse.headers.Content-Type CONTAINS "application/json"
+ASSERT xmlResponse.headers.Content-Type CONTAINS "application/xml"
+ASSERT htmlResponse.headers.Content-Type CONTAINS "text/html"
+
+# JSON content assertions (for JSONPlaceholder)
+ASSERT singlePost.json.id == 1
+ASSERT singlePost.json.userId == 1
+ASSERT userInfo.json.id == 1
+
+# Response body content assertions
+ASSERT httpbinGet.json.args.param1 == "value1"
+ASSERT httpbinPost.json.json.message == "Hello from Hitman!"

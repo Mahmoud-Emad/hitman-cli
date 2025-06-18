@@ -56,9 +56,13 @@ impl From<&ResponseInfo> for HitmanResponse {
 impl HttpExecutor {
     /// Create a new HTTP executor with custom timeout.
     pub fn new(timeout_secs: u64, use_colors: bool) -> Self {
+        // Get version from Cargo.toml dynamically
+        let version = env!("CARGO_PKG_VERSION");
+        let user_agent = format!("Hitman-CLI/{}", version);
+
         let client = Client::builder()
             .timeout(Duration::from_secs(timeout_secs))
-            .user_agent("Hitman/0.1.0")
+            .user_agent(user_agent)
             .build()
             .expect("Failed to create HTTP client");
 
@@ -117,9 +121,20 @@ impl HttpExecutor {
                 .request(reqwest::Method::from_bytes(b"UNLOCK").unwrap(), final_url),
         };
 
-        // Add headers
+        // Add headers from command
         for (key, value) in &command.headers {
             request_builder = request_builder.header(key, value);
+        }
+
+        // Add User-Agent header if not already specified
+        if !command
+            .headers
+            .iter()
+            .any(|(key, _)| key.to_lowercase() == "user-agent")
+        {
+            let version = env!("CARGO_PKG_VERSION");
+            let user_agent = format!("Hitman-CLI/{}", version);
+            request_builder = request_builder.header("User-Agent", user_agent);
         }
 
         // Add body if present

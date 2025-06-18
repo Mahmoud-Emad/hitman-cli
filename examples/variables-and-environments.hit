@@ -1,0 +1,191 @@
+# Variables and Environment Configuration Example
+# Demonstrates advanced variable usage and environment-specific configurations
+#
+# This example shows:
+# - Variable definition and substitution
+# - Complex JSON objects as variables
+# - Environment-specific configurations
+# - Variable reuse and composition
+# - Dynamic URL construction
+# - Conditional logic simulation
+#
+# Usage:
+#   hitman examples/variables-and-environments.hit
+#   hitman examples/variables-and-environments.hit --define env="staging"
+
+# ===== ENVIRONMENT CONFIGURATION =====
+DEFINE env="development"
+DEFINE version="v1"
+
+# Environment-specific base URLs
+DEFINE devBaseUrl="https://jsonplaceholder.typicode.com"
+DEFINE stagingBaseUrl="https://jsonplaceholder.typicode.com"
+DEFINE prodBaseUrl="https://jsonplaceholder.typicode.com"
+
+# Use development as default (can be overridden with --define env="staging")
+DEFINE baseUrl="{{devBaseUrl}}"
+DEFINE apiVersion="{{version}}"
+
+# ===== AUTHENTICATION VARIABLES =====
+DEFINE authToken="dev-token-12345"
+DEFINE apiKey="dev-api-key-67890"
+DEFINE clientId="hitman-cli-dev"
+
+# ===== USER DATA VARIABLES =====
+DEFINE testUser={
+    "name": "Test User",
+    "email": "test@example.com",
+    "role": "developer",
+    "permissions": ["read", "write"],
+    "metadata": {
+        "created_by": "hitman-cli",
+        "environment": "{{env}}",
+        "version": "{{version}}"
+    }
+}
+
+DEFINE updateData={
+    "status": "active",
+    "last_updated": "2024-01-01T00:00:00Z",
+    "updated_by": "{{clientId}}"
+}
+
+# ===== REQUEST CONFIGURATION VARIABLES =====
+DEFINE defaultHeaders={
+    "X-Environment": "{{env}}",
+    "X-API-Version": "{{apiVersion}}",
+    "X-Client-ID": "{{clientId}}"
+}
+
+DEFINE authHeaders={
+    "Authorization": "Bearer {{authToken}}",
+    "X-API-Key": "{{apiKey}}"
+}
+
+# ===== DYNAMIC URL CONSTRUCTION =====
+
+# Basic resource access
+GET {{baseUrl}}/posts
+    WITH HEADER {
+        "X-Environment": "{{env}}"
+    }
+    AS getAllPosts
+
+# Parameterized resource access
+GET {{baseUrl}}/posts/1
+    WITH HEADER {
+        "X-Environment": "{{env}}"
+    }
+    AS getSpecificPost
+
+# Query parameter construction
+GET {{baseUrl}}/posts
+    WITH QUERY {
+        "userId": "1",
+        "env": "{{env}}",
+        "version": "{{apiVersion}}"
+    }
+    AS getPostsWithParams
+
+# ===== COMPLEX DATA OPERATIONS =====
+
+# Create resource with complex variable substitution
+POST https://httpbin.org/post
+    WITH HEADER {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {{authToken}}",
+        "X-Environment": "{{env}}"
+    }
+    WITH DATA {
+        "user": {{testUser}},
+        "operation": "create",
+        "environment": "{{env}}",
+        "api_version": "{{apiVersion}}",
+        "client_info": {
+            "client_id": "{{clientId}}",
+            "auth_token": "{{authToken}}"
+        }
+    }
+    AS createUserWithVariables
+
+# Update operation with merged data
+PUT https://httpbin.org/put
+    WITH HEADER {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {{authToken}}"
+    }
+    WITH DATA {
+        "user_id": 1,
+        "updates": {{updateData}},
+        "environment": "{{env}}",
+        "metadata": {
+            "operation": "update",
+            "client": "{{clientId}}",
+            "version": "{{apiVersion}}"
+        }
+    }
+    AS updateUserWithVariables
+
+# ===== ENVIRONMENT-SPECIFIC TESTING =====
+
+# Health check with environment info
+GET https://httpbin.org/get
+    WITH QUERY {
+        "health": "check",
+        "env": "{{env}}",
+        "version": "{{apiVersion}}"
+    }
+    WITH HEADER {
+        "X-Environment": "{{env}}",
+        "X-Health-Check": "true"
+    }
+    AS healthCheck
+
+# Configuration endpoint simulation
+GET https://httpbin.org/get
+    WITH QUERY {
+        "config": "app",
+        "environment": "{{env}}"
+    }
+    WITH HEADER {
+        "Authorization": "Bearer {{authToken}}"
+    }
+    AS getConfiguration
+
+# ===== VARIABLE COMPOSITION EXAMPLES =====
+
+# Nested variable usage
+POST https://httpbin.org/post
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "request_info": {
+            "environment": "{{env}}",
+            "base_url": "{{baseUrl}}",
+            "version": "{{apiVersion}}",
+            "client": "{{clientId}}"
+        },
+        "user_data": {{testUser}},
+        "auth_info": {
+            "token": "{{authToken}}",
+            "api_key": "{{apiKey}}"
+        }
+    }
+    AS complexVariableComposition
+
+# ===== ASSERTIONS WITH VARIABLES =====
+ASSERT getAllPosts.status == 200
+ASSERT getSpecificPost.status == 200
+ASSERT getPostsWithParams.status == 200
+ASSERT createUserWithVariables.status == 200
+ASSERT updateUserWithVariables.status == 200
+ASSERT healthCheck.status == 200
+ASSERT getConfiguration.status == 200
+ASSERT complexVariableComposition.status == 200
+
+# Verify variable substitution in responses
+ASSERT healthCheck.json.args.env == "development"
+ASSERT healthCheck.json.args.version == "v1"
+ASSERT createUserWithVariables.json.json.environment == "development"
+ASSERT createUserWithVariables.json.json.api_version == "v1"

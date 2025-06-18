@@ -1,0 +1,72 @@
+# Fast Performance Testing Example
+# Optimized for speed with fewer, more efficient requests
+#
+# This example demonstrates:
+# - Optimized request selection for faster execution
+# - Efficient use of cached endpoints
+# - Minimal payload sizes
+# - Essential assertions only
+#
+# Usage:
+#   hitman examples/fast-performance-test.hit
+#   hitman examples/fast-performance-test.hit --parallel
+
+# ===== CONFIGURATION =====
+DEFINE jsonPlaceholderBase="https://jsonplaceholder.typicode.com"
+DEFINE httpbinBase="https://httpbin.org"
+
+
+# ===== FAST REQUESTS ONLY =====
+
+# Test 1: Single post (fast, cached)
+GET {{jsonPlaceholderBase}}/posts/1 AS singlePost
+
+# Test 2: User info (fast, cached)
+GET {{jsonPlaceholderBase}}/users/1 AS userInfo
+
+# Test 3: Simple GET with params
+GET {{httpbinBase}}/get
+    WITH QUERY {
+        "test": "fast"
+    }
+    AS httpbinGet
+
+# Test 4: Simple POST
+POST {{httpbinBase}}/post
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "message": "Fast test"
+    }
+    AS httpbinPost
+
+# Test 5: Status code test
+GET {{httpbinBase}}/status/200 AS status200
+
+# Test 6: JSON response
+GET {{httpbinBase}}/json AS jsonResponse
+
+# Test 7: Headers test
+GET {{httpbinBase}}/headers
+    WITH HEADER {
+        "X-Test": "fast"
+    }
+    AS headersTest
+
+# Test 8: Basic auth
+GET {{httpbinBase}}/basic-auth/user/passwd
+    WITH HEADER {
+        "Authorization": "Basic dXNlcjpwYXNzd2Q="
+    }
+    AS basicAuth
+
+# ===== ASSERTIONS =====
+ASSERT singlePost.status == 200
+ASSERT userInfo.status == 200
+ASSERT httpbinGet.status == 200
+ASSERT httpbinPost.status == 200
+ASSERT status200.status == 200
+ASSERT jsonResponse.status == 200
+ASSERT headersTest.status == 200
+ASSERT basicAuth.status == 200

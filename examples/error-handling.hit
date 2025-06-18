@@ -1,0 +1,135 @@
+# Error Handling and Status Code Testing Example
+# Demonstrates how Hitman CLI handles various HTTP status codes and error scenarios
+#
+# This example shows:
+# - Testing different HTTP status codes (2xx, 3xx, 4xx, 5xx)
+# - Error response validation
+# - Timeout handling
+# - Network error scenarios
+# - Assertion failures and success patterns
+# - Automatic User-Agent header (added by Hitman CLI)
+#
+# Usage:
+#   hitman examples/error-handling.hit
+
+# ===== CONFIGURATION =====
+DEFINE httpbinUrl="https://httpbin.org"
+
+# ===== SUCCESS RESPONSES (2xx) =====
+
+# Standard success
+GET {{httpbinUrl}}/status/200 AS success200
+
+# Created response
+GET {{httpbinUrl}}/status/201 AS created201
+
+# Accepted response
+GET {{httpbinUrl}}/status/202 AS accepted202
+
+# No content response
+GET {{httpbinUrl}}/status/204 AS noContent204
+
+# ===== REDIRECTION RESPONSES (3xx) =====
+
+# Moved permanently
+GET {{httpbinUrl}}/status/301 AS movedPermanently301
+
+# Found (temporary redirect)
+GET {{httpbinUrl}}/status/302 AS found302
+
+# Not modified
+GET {{httpbinUrl}}/status/304 AS notModified304
+
+# ===== CLIENT ERROR RESPONSES (4xx) =====
+
+# Bad request
+GET {{httpbinUrl}}/status/400 AS badRequest400
+
+# Unauthorized
+GET {{httpbinUrl}}/status/401 AS unauthorized401
+
+# Forbidden
+GET {{httpbinUrl}}/status/403 AS forbidden403
+
+# Not found
+GET {{httpbinUrl}}/status/404 AS notFound404
+
+# Method not allowed
+GET {{httpbinUrl}}/status/405 AS methodNotAllowed405
+
+# Conflict
+GET {{httpbinUrl}}/status/409 AS conflict409
+
+# Unprocessable entity
+GET {{httpbinUrl}}/status/422 AS unprocessableEntity422
+
+# Too many requests
+GET {{httpbinUrl}}/status/429 AS tooManyRequests429
+
+# ===== SERVER ERROR RESPONSES (5xx) =====
+
+# Internal server error
+GET {{httpbinUrl}}/status/500 AS internalServerError500
+
+# Bad gateway
+GET {{httpbinUrl}}/status/502 AS badGateway502
+
+# Service unavailable
+GET {{httpbinUrl}}/status/503 AS serviceUnavailable503
+
+# Gateway timeout
+GET {{httpbinUrl}}/status/504 AS gatewayTimeout504
+
+# ===== TIMEOUT AND DELAY TESTING =====
+
+# Short delay (should succeed)
+GET {{httpbinUrl}}/delay/1 AS shortDelay
+
+# Medium delay (test timeout handling)
+GET {{httpbinUrl}}/delay/3 AS mediumDelay
+
+# ===== ERROR RESPONSE CONTENT TESTING =====
+
+# Test error response with JSON content
+POST {{httpbinUrl}}/status/400
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "invalid": "request"
+    }
+    AS errorWithContent
+
+# ===== ASSERTIONS FOR SUCCESS CASES =====
+ASSERT success200.status == 200
+ASSERT created201.status == 201
+ASSERT accepted202.status == 202
+ASSERT noContent204.status == 204
+
+# ===== ASSERTIONS FOR REDIRECT CASES =====
+ASSERT movedPermanently301.status == 301
+ASSERT found302.status == 302
+ASSERT notModified304.status == 304
+
+# ===== ASSERTIONS FOR CLIENT ERROR CASES =====
+ASSERT badRequest400.status == 400
+ASSERT unauthorized401.status == 401
+ASSERT forbidden403.status == 403
+ASSERT notFound404.status == 404
+ASSERT methodNotAllowed405.status == 405
+ASSERT conflict409.status == 409
+ASSERT unprocessableEntity422.status == 422
+ASSERT tooManyRequests429.status == 429
+
+# ===== ASSERTIONS FOR SERVER ERROR CASES =====
+ASSERT internalServerError500.status == 500
+ASSERT badGateway502.status == 502
+ASSERT serviceUnavailable503.status == 503
+ASSERT gatewayTimeout504.status == 504
+
+# ===== ASSERTIONS FOR DELAY TESTING =====
+ASSERT shortDelay.status == 200
+ASSERT mediumDelay.status == 200
+
+# ===== ASSERTIONS FOR ERROR CONTENT =====
+ASSERT errorWithContent.status == 400

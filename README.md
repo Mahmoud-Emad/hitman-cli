@@ -142,10 +142,35 @@ hitman requests.hit --env staging.env
 hitman requests.hit --report results.json
 ```
 
+## 📚 Examples
+
+Explore comprehensive examples in the [`examples/`](examples/) directory:
+
+- **[`simple.hit`](examples/simple.hit)** - Basic HTTP requests and syntax
+- **[`comprehensive.hit`](examples/comprehensive.hit)** - Advanced features showcase
+- **[`real-world-api-testing.hit`](examples/real-world-api-testing.hit)** - Complete real-world API testing scenarios
+- **[`authentication-patterns.hit`](examples/authentication-patterns.hit)** - Various authentication methods
+- **[`rest-api-crud.hit`](examples/rest-api-crud.hit)** - Full CRUD operations example
+- **[`error-handling.hit`](examples/error-handling.hit)** - HTTP status codes and error scenarios
+- **[`variables-and-environments.hit`](examples/variables-and-environments.hit)** - Advanced variable usage
+- **[`fast-performance-test.hit`](examples/fast-performance-test.hit)** - Optimized for speed testing
+
+### Quick Example Run
+```bash
+# Try the real-world example
+hitman examples/real-world-api-testing.hit
+
+# Test authentication patterns
+hitman examples/authentication-patterns.hit --dry-run
+
+# Run CRUD operations
+hitman examples/rest-api-crud.hit --parallel
+```
+
 ## 📖 Documentation
 
 - **[Installation Guide](docs/installation.md)** - Detailed installation instructions
-- **[Usage Guide](docs/usage.md)** - Examples and common patterns  
+- **[Usage Guide](docs/usage.md)** - Examples and common patterns
 - **[File Format](docs/file-format.md)** - Complete `.hit` syntax reference
 - **[CLI Reference](docs/cli-reference.md)** - All command-line options
 - **[Cross-Platform Setup](CROSS_PLATFORM_SETUP.md)** - Build and deployment info

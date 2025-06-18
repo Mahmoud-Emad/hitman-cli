@@ -1,0 +1,115 @@
+# Authentication Patterns Example
+# Demonstrates various authentication methods supported by Hitman CLI
+#
+# This example shows:
+# - Basic Authentication
+# - Bearer Token Authentication
+# - API Key Authentication (header-based)
+# - Custom Authentication Headers
+# - JWT Token patterns
+#
+# Usage:
+#   hitman examples/authentication-patterns.hit
+
+# ===== CONFIGURATION =====
+DEFINE baseUrl="https://httpbin.org"
+DEFINE apiKey="your-api-key-here"
+DEFINE bearerToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example"
+DEFINE basicAuthCredentials="dXNlcjpwYXNzd2Q="
+
+# ===== BASIC AUTHENTICATION =====
+
+# Basic Auth with encoded credentials
+GET {{baseUrl}}/basic-auth/user/passwd
+    WITH HEADER {
+        "Authorization": "Basic {{basicAuthCredentials}}"
+    }
+    AS basicAuthTest
+
+# ===== BEARER TOKEN AUTHENTICATION =====
+
+# Bearer token authentication
+GET {{baseUrl}}/bearer
+    WITH HEADER {
+        "Authorization": "Bearer {{bearerToken}}"
+    }
+    AS bearerTokenTest
+
+# ===== API KEY AUTHENTICATION =====
+
+# API Key in header
+GET {{baseUrl}}/headers
+    WITH HEADER {
+        "X-API-Key": "{{apiKey}}"
+    }
+    AS apiKeyHeaderTest
+
+# API Key in query parameter
+GET {{baseUrl}}/get
+    WITH QUERY {
+        "api_key": "{{apiKey}}"
+    }
+    AS apiKeyQueryTest
+
+# ===== CUSTOM AUTHENTICATION HEADERS =====
+
+# Custom authentication header
+GET {{baseUrl}}/headers
+    WITH HEADER {
+        "X-Auth-Token": "{{bearerToken}}",
+        "X-Client-ID": "hitman-cli"
+    }
+    AS customAuthTest
+
+# Multiple authentication headers
+GET {{baseUrl}}/headers
+    WITH HEADER {
+        "Authorization": "Bearer {{bearerToken}}",
+        "X-API-Key": "{{apiKey}}",
+        "X-Request-ID": "auth-test-001"
+    }
+    AS multiAuthTest
+
+# ===== AUTHENTICATION WITH POST REQUESTS =====
+
+# Login simulation with credentials
+POST {{baseUrl}}/post
+    WITH HEADER {
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "username": "testuser",
+        "password": "testpass",
+        "grant_type": "password"
+    }
+    AS loginSimulation
+
+# Authenticated POST request
+POST {{baseUrl}}/post
+    WITH HEADER {
+        "Authorization": "Bearer {{bearerToken}}",
+        "Content-Type": "application/json"
+    }
+    WITH DATA {
+        "action": "create_resource",
+        "data": {
+            "name": "Test Resource",
+            "type": "example"
+        }
+    }
+    AS authenticatedPost
+
+# ===== ASSERTIONS =====
+ASSERT basicAuthTest.status == 200
+ASSERT bearerTokenTest.status == 200
+ASSERT apiKeyHeaderTest.status == 200
+ASSERT apiKeyQueryTest.status == 200
+ASSERT customAuthTest.status == 200
+ASSERT multiAuthTest.status == 200
+ASSERT loginSimulation.status == 200
+ASSERT authenticatedPost.status == 200
+
+# Verify authentication headers are echoed back
+ASSERT apiKeyHeaderTest.json.headers.X-API-Key == "your-api-key-here"
+ASSERT customAuthTest.json.headers.X-Auth-Token CONTAINS "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+ASSERT multiAuthTest.json.headers.Authorization CONTAINS "Bearer"
